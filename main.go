@@ -47,15 +47,16 @@ func main() {
 	c.Wait() // wait for all the threads to finish executing
 	// remove duplicates
 	offers = removeDup(offers)
+	// Create a csv file to store the extracted information
 	f, err := os.Create("file.csv")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	defer f.Close()
-	// convert to [][]string or list of list of string from struct
+	// convert to [][]string or list of list of string from struct. Marshalling the struct
 	offersString := tranform2D(offers)
-	// Initialise csv writer and then write all of them to the file
+	// Initialise csv writer and then write all of them to the file. CSV requries [][]string to write.
 	w := csv.NewWriter(f)
 	w.WriteAll(offersString)
 	if err := w.Error(); err != nil {
@@ -65,10 +66,13 @@ func main() {
 
 func extract(r *colly.HTMLElement) {
 	temp := offer{}
+	//select the value of attribute "internshipid" to uniquely identify the job details
 	temp.id = r.Attr("internshipid")
+	//select the child text with the class mentioned. These are go queries
 	temp.company = r.ChildText(".link_display_like_text")
 	temp.stipend = r.ChildText(".stipend")
 	temp.posted = r.ChildText("div.posted_by_container")
+	// Form the whole internshala url
 	temp.link = "www.internshala.com" + r.ChildAttr("a.view_detail_button", "href")
 	offers = append(offers, temp)
 }
